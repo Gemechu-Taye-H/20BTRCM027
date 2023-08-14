@@ -1,33 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import TrainList from './TrainList'; // Import your TrainList component
 
-function App() {
-  const [authToken, setAuthToken] = useState('');
+const TrainList = ({ authToken }) => {
+  const [setTrains] = useState([]);
+  const [setSpecificTrain] = useState(null);
 
   useEffect(() => {
-    const fetchAuthToken = async () => {
+    const fetchTrains = async () => {
       try {
-        const response = await axios.post('http://20.244.56.144/train/auth', {
-          companyName: 'Train Central',
-          clientID: 'YOUR_CLIENT_ID',
-          clientSecret: 'YOUR_CLIENT_SECRET',
-          // other parameters
+        const response = await axios.get('http://20.244.56.144/train/trains', {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
         });
-        setAuthToken(response.data.access_token);
+        setTrains(response.data);
       } catch (error) {
-        console.error('Error fetching authorization token:', error);
+        console.error('Error fetching trains:', error);
       }
     };
 
-    fetchAuthToken();
-  }, []);
+    const fetchSpecificTrain = async () => {
+      try {
+        const response = await axios.get('http://20.244.56.144/train/trains/2344', {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+        setSpecificTrain(response.data);
+      } catch (error) {
+        console.error('Error fetching specific train:', error);
+      }
+    };
 
-  return (
-    <div className="App">
-      <TrainList authToken={authToken} />
-    </div>
-  );
-}
+    fetchTrains();
+    fetchSpecificTrain();
+  }, [authToken, setSpecificTrain, setTrains]);
 
-export default App;
+  // ... The rest of your TrainList component code
+};
+
+export default TrainList;
